@@ -1,0 +1,19 @@
+.jumbotron {
+   background-color: white;
+}
+
+h1 {
+    color: blue;
+}
+
+body {
+    background: url("../images/Brain.jpg")no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+#images {
+    height: 200px;
+    width: 200px;
+}
