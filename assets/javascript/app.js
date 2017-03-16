@@ -1,7 +1,7 @@
  
 
 
- // Initialize Firebase
+ // FIrebase
   var config = {
     apiKey: "AIzaSyAFlbXIrstKmTL3drHw641Z6rWHoGsiYs4",
     authDomain: "fir-dave.firebaseapp.com",
@@ -11,18 +11,15 @@
   };
   firebase.initializeApp(config);
 
-
-
-// VARIABLES
 var database = firebase.database();
-
+// var for train
 var trainName = "";
 var destination = "";
 var firstTrainTime = "";
 var frequency = 0;
 
 
-// FUNCTIONS + EVENTS
+// function to set form input to var
 $("#addTrain").on("click", function() {
 
   trainName = $('#nameInput').val().trim();
@@ -34,7 +31,7 @@ $("#addTrain").on("click", function() {
   console.log(destination);
   console.log(firstTrainTime);
   console.log(frequency);
-
+// communicate with database 
   database.ref().push({
     trainName: trainName,
     destination: destination,
@@ -46,7 +43,7 @@ $("#addTrain").on("click", function() {
 });
 
 
-
+// database adding snapshot child
 database.ref().on("child_added", function(snapshot) {
   console.log(snapshot.val());
 
@@ -57,10 +54,9 @@ database.ref().on("child_added", function(snapshot) {
   frequency = snapshot.val().frequency;
 
 
-  // moment.js methods for time calls and calculations. lines 57 to 65 were accomplished with Tenor's assistance. I didn't update the current time. It looks like "Minutes Away" may be larger than the frequency interval :(
+  // moment methods for time calls and calculations. 
   var firstTrainMoment = moment(firstTrainTime, 'HH:mm');
-  var nowMoment = moment(); // creates a moment object of current date and time and storing it in a variable whenever the user click the submit button
-
+  var nowMoment = moment(); // moment object of current time 
   var minutesSinceFirstArrival = nowMoment.diff(firstTrainMoment, 'minutes');
   var minutesSinceLastArrival = minutesSinceFirstArrival % frequency;
   var minutesAway = frequency - minutesSinceLastArrival;
@@ -69,26 +65,34 @@ database.ref().on("child_added", function(snapshot) {
   var formatNextArrival = nextArrival.format("HH:mm");
 
 
-  // add table
-  var tr = $('<tr>');
-  var a = $('<td>');
-  var b = $('<td>');
-  var c = $('<td>');
-  var d = $('<td>');
-  var e = $('<td>');
-  a.append(trainName);
-  b.append(destination);
-  c.append(frequency);
-  d.append(formatNextArrival);
-  e.append(minutesAway);
-  tr.append(a).append(b).append(c).append(d).append(e);
+  // appending table
+  var tr = $('<tr class="active">');
+  var lineOne = $('<td>');
+  var lineTwo = $('<td>');
+  var lineThree = $('<td>');
+  var lineFour = $('<td>');
+  var lineFive = $('<td>');
+  lineOne.append(trainName);
+  lineTwo.append(destination);
+  lineThree.append(frequency);
+  lineFour.append(formatNextArrival);
+  lineFive.append(minutesAway);
+  tr.append(lineOne).append(lineTwo).append(lineThree).append(lineFour).append(lineFive);
   $('#newTrains').append(tr);
 
 
   }, function (errorObject) {
 
   // In case of error this will print the error
-    console.log("The read failed: " + errorObject.code);
+    console.log("didnt go through " + errorObject.code);
+
+// remove train function 
+    $("body").on("click", ".remove-train", function(){
+     $(this).closest ('tr').remove();
+     getKey = $(this).parent().parent().attr('id');
+     dataRef.child(getKey).remove();
+	});
+
 
 });
 
