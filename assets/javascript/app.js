@@ -11,92 +11,84 @@
   };
   firebase.initializeApp(config);
 
+
+
+// VARIABLES
 var database = firebase.database();
 
-database.ref().on("child_added", function(childSnapshot) {
-	var trainName = childSnapshot.val().name;
-	var trainDest = childSnapshot.val().destination;
-	var trainFirst = childSnapshot.val().firstTrain;
-	var trainFreq = childSnapshot.val().frequency;
-
-	var currentTime = moment();
-	console.log("Current time: " + currentTime + " & converted: " + moment(currentTime).format("hh:mm"));
-
-	var convertedFreq = trainFreq * 60000;
-
-	var firstTrainTime = moment().hour(trainFirst.substring(0,2)).minute(trainFirst.substring(3,5));
-	console.log("firstTrainTime " + firstTrainTime + " & converted: " + moment(firstTrainTime).format("hh:mm"));
-
-	var minutesAway = convertedFreq - ((currentTime - firstTrainTime) % convertedFreq);
-	console.log("minutesAway: " + minutesAway);
-
-	var convertedMinAway = Math.floor(minutesAway / 60000);
-	console.log("convertedMinAway: " + convertedMinAway);
-
-	var nextArr = currentTime + minutesAway;
-	nextArr = moment(nextArr).format("hh:mm");
-	console.log("nextArr: " + nextArr);
-
-	var newRow = $("<tr>")
-		.append($("<td width='14%'>").html(trainName))
-		.append($("<td width='14%'>").html(trainDest))
-		.append($("<td width='14%'>").html(trainFreq + " min"))
-		.append($("<td width='14%'>").html(nextArr))
-		.append($("<td width='14%'>").html(convertedMinAway));
+var trainName = "";
+var destination = "";
+var firstTrainTime = "";
+var frequency = 0;
 
 
-	$("#scheduleTable").append(newRow);
+// FUNCTIONS + EVENTS
+$("#addTrain").on("click", function() {
 
-})
+  trainName = $('#nameInput').val().trim();
+  destination = $('#trainDest').val().trim();
+  firstTrainTime = $('#trainFirst').val().trim();
+  frequency = $('#trainFreq').val().trim();
 
-// after submit button launch collect and check form
-$("#submitTrain").on("click", function() {
-event.preventDefault();
+  console.log(trainName);
+  console.log(destination);
+  console.log(firstTrainTime);
+  console.log(frequency);
 
-var trainName = $("trainName").val().trim();
-var trainDest = $("trainDest").val().trim();
-var trainFirst = $("trainFirst").val().trim();
-var trainFreq = $("trainFreq").val().trim();
+  database.ref().push({
+    trainName: trainName,
+    destination: destination,
+    firstTrainTime: firstTrainTime,
+    frequency: frequency
+  });
 
-console.log(moment(trainFirst, "hh:mm"));
-	// input validation
-	if (trainName.length !== 0) {
-		var trainNameValid = true;
-	}
-	if (trainDest.length !== 0 && typeof(trainDest) === 'string') {
-		var trainDestValid = true;
-	}
-	if (moment(trainFirst, "hh:mm").isValid()){
-		var startTimeValid = true;
-		console.log("test: " + moment(trainFirst, "hh:mm").format("hh:mm"));
-	} else {
-		console.log("else: " + moment(trainFirst, "hh:mm"))
-	}
-	if (typeof(trainFreq) === 'number') {
-		var trainFreqValid = true;
-	}
-	
-
-	if (trainNameValid && trainDestValid && startTimeValid && trainFreqValid) {
-		// temporary storage for form
-		var newTrain = {
-			name: trainName,
-			destination: trainDest,
-			firstTrain: trainFirst,
-			frequency: trainFreq,
-		}
-
-		// push to the database 
-		database.ref().push(newTrain);
-	}
-
-	$("#trainName").val("");
-	$("#trainDest").val("");	
-	$("#trainFirst").val("");
-	$("#trainFreq").val("");
-	});
+    return false;
+});
 
 
-console.log(database);
 
+database.ref().on("child_added", function(snapshot) {
+  console.log(snapshot.val());
+
+  // update the variable with data from the database
+  trainName = snapshot.val().trainName;
+  destination = snapshot.val().destination;
+  firstTrainTime = snapshot.val().firstTrainTime;
+  frequency = snapshot.val().frequency;
+
+
+  // moment.js methods for time calls and calculations. lines 57 to 65 were accomplished with Tenor's assistance. I didn't update the current time. It looks like "Minutes Away" may be larger than the frequency interval :(
+  var firstTrainMoment = moment(firstTrainTime, 'HH:mm');
+  var nowMoment = moment(); // creates a moment object of current date and time and storing it in a variable whenever the user click the submit button
+
+  var minutesSinceFirstArrival = nowMoment.diff(firstTrainMoment, 'minutes');
+  var minutesSinceLastArrival = minutesSinceFirstArrival % frequency;
+  var minutesAway = frequency - minutesSinceLastArrival;
+
+  var nextArrival = nowMoment.add(minutesAway, 'minutes');
+  var formatNextArrival = nextArrival.format("HH:mm");
+
+
+  // add table
+  var tr = $('<tr>');
+  var a = $('<td>');
+  var b = $('<td>');
+  var c = $('<td>');
+  var d = $('<td>');
+  var e = $('<td>');
+  a.append(trainName);
+  b.append(destination);
+  c.append(frequency);
+  d.append(formatNextArrival);
+  e.append(minutesAway);
+  tr.append(a).append(b).append(c).append(d).append(e);
+  $('#newTrains').append(tr);
+
+
+  }, function (errorObject) {
+
+  // In case of error this will print the error
+    console.log("The read failed: " + errorObject.code);
+
+});
 
