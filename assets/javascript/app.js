@@ -21,7 +21,7 @@ var frequency = 0;
 
 // function to set form input to var
 $("#addTrain").on("click", function() {
-
+// grab user input with a val and .trim cleans out white space 
   trainName = $('#nameInput').val().trim();
   destination = $('#trainDest').val().trim();
   firstTrainTime = $('#trainFirst').val().trim();
@@ -31,23 +31,23 @@ $("#addTrain").on("click", function() {
   console.log(destination);
   console.log(firstTrainTime);
   console.log(frequency);
-// communicate with database 
+// push this to the firebase database 
   database.ref().push({
     trainName: trainName,
     destination: destination,
     firstTrainTime: firstTrainTime,
     frequency: frequency
   });
-
+  // stay false until called 
     return false;
 });
 
 
-// database adding snapshot child
+// database adding snapshot child to firebase snapshot is best practice term to firebase
 database.ref().on("child_added", function(snapshot) {
   console.log(snapshot.val());
 
-  // update the variable with data from the database
+  // Grab the val from firebase database and store them over to these var names.
   trainName = snapshot.val().trainName;
   destination = snapshot.val().destination;
   firstTrainTime = snapshot.val().firstTrainTime;
@@ -56,7 +56,9 @@ database.ref().on("child_added", function(snapshot) {
 
   // moment methods for time calls and calculations. 
   var firstTrainMoment = moment(firstTrainTime, 'HH:mm');
+  console.log("firstTrainMoment" + firstTrainMoment);
   var nowMoment = moment(); // moment object of current time 
+  console.log("nowMoment" + firstTrainMoment);
   var minutesSinceFirstArrival = nowMoment.diff(firstTrainMoment, 'minutes');
   var minutesSinceLastArrival = minutesSinceFirstArrival % frequency;
   var minutesAway = frequency - minutesSinceLastArrival;
@@ -65,7 +67,7 @@ database.ref().on("child_added", function(snapshot) {
   var formatNextArrival = nextArrival.format("HH:mm");
 
 
-  // appending table
+  // appending  to table withthin a table row
   var tr = $('<tr class="active">');
   var lineOne = $('<td>');
   var lineTwo = $('<td>');
