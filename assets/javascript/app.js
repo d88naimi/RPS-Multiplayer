@@ -1,15 +1,12 @@
- 
-
-
- // FIrebase
-  var config = {
-    apiKey: "AIzaSyAFlbXIrstKmTL3drHw641Z6rWHoGsiYs4",
-    authDomain: "fir-dave.firebaseapp.com",
-    databaseURL: "https://fir-dave.firebaseio.com",
-    storageBucket: "fir-dave.appspot.com",
-    messagingSenderId: "936693713047"
-  };
-  firebase.initializeApp(config);
+// FIrebase Connection
+var config = {
+  apiKey: "AIzaSyAFlbXIrstKmTL3drHw641Z6rWHoGsiYs4",
+  authDomain: "fir-dave.firebaseapp.com",
+  databaseURL: "https://fir-dave.firebaseio.com",
+  storageBucket: "fir-dave.appspot.com",
+  messagingSenderId: "936693713047"
+};
+firebase.initializeApp(config);
 
 var database = firebase.database();
 // var for train
@@ -20,18 +17,15 @@ var frequency = 0;
 
 
 // function to set form input to var
-$("#addTrain").on("click", function() {
-// grab user input with a val and .trim cleans out white space 
+$("#addTrain").on("click", function () {
+  // grab user input with a val and .trim cleans out white space 
   trainName = $('#nameInput').val().trim();
   destination = $('#trainDest').val().trim();
   firstTrainTime = $('#trainFirst').val().trim();
   frequency = $('#trainFreq').val().trim();
 
-  console.log(trainName);
-  console.log(destination);
-  console.log(firstTrainTime);
-  console.log(frequency);
-// push this to the firebase database 
+
+  // push this to the firebase database 
   database.ref().push({
     trainName: trainName,
     destination: destination,
@@ -39,12 +33,12 @@ $("#addTrain").on("click", function() {
     frequency: frequency
   });
   // stay false until called 
-    return false;
+  return false;
 });
 
 
 // database adding snapshot child to firebase snapshot is best practice term to firebase
-database.ref().on("child_added", function(snapshot) {
+database.ref().on("child_added", function (snapshot) {
   console.log(snapshot.val());
 
   // Grab the val from firebase database and store them over to these var names.
@@ -83,17 +77,17 @@ database.ref().on("child_added", function(snapshot) {
   $('#newTrains').append(tr);
 
 
-  }, function (errorObject) {
+}, function (errorObject) {
 
   // In case of error this will print the error
-    console.log("didnt go through " + errorObject.code);
+  console.log("didnt go through " + errorObject.code);
 
-// remove train function 
-    $("body").on("click", ".remove-train", function(){
-     $(this).closest ('tr').remove();
-     getKey = $(this).parent().parent().attr('id');
-     dataRef.child(getKey).remove();
-	});
+  // remove train function 
+  $("body").on("click", ".remove-train", function () {
+    $(this).closest('tr').remove();
+    getKey = $(this).parent().parent().attr('id');
+    dataRef.child(getKey).remove();
+  });
 
 
 });
